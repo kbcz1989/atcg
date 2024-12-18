@@ -46,6 +46,25 @@ A Go-based tool for dynamically generating Ansible tasks and playbooks by levera
 
 ## Installation
 
+### Installation with asdf version manager
+```shell
+# Add the plugin
+asdf plugin add atcg https://github.com/kbcz1989/asdf-atcg.git
+
+# Install a version
+asdf install atcg latest
+
+# Set it globally
+asdf global atcg latest
+
+# Verify installation
+atcg --version
+```
+
+---
+
+### Manual installation
+
 ### Linux:
 
 ```bash
