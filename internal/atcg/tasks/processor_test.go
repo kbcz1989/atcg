@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,12 +34,12 @@ func TestParseAndGenerateTask_Success(t *testing.T) {
 		t.Errorf("unexpected task output, got:\n%s\nexpected:\n%s", task, expected)
 	}
 }
-
 func TestParseAndGenerateTask_ParseError(t *testing.T) {
 	// Mock executor to simulate an error during command execution
+	expectedErr := fmt.Errorf("failed to execute ansible-doc")
 	mockExecutor := &mocks.MockExecutor{
 		MockExecute: func(command string, args ...string) ([]byte, error) {
-			return nil, fmt.Errorf("failed to execute ansible-doc")
+			return nil, expectedErr
 		},
 	}
 
@@ -48,10 +49,9 @@ func TestParseAndGenerateTask_ParseError(t *testing.T) {
 		t.Fatal("expected an error, got nil")
 	}
 
-	// Verify that the error message is as expected
-	expectedError := "error fetching documentation for module ansible.builtin.debug: failed to execute ansible-doc"
-	if err.Error() != expectedError {
-		t.Errorf("unexpected error message: got %q, expected %q", err.Error(), expectedError)
+	// Verify that the error contains the expected underlying error
+	if !errors.Is(err, expectedErr) {
+		t.Errorf("unexpected error: %v", err)
 	}
 }
 

@@ -14,7 +14,10 @@ type MockExecutor struct {
 
 // Execute runs the mocked command and returns the predefined output.
 func (m *MockExecutor) Execute(command string, args ...string) ([]byte, error) {
-	return m.OutputFunc(command, args...)
+	if m.OutputFunc != nil {
+		return m.OutputFunc(command, args...)
+	}
+	return nil, errors.New("mock executor not configured")
 }
 
 func TestParseModuleDoc_Success(t *testing.T) {
@@ -72,9 +75,10 @@ func TestParseModuleDoc_Success(t *testing.T) {
 
 func TestParseModuleDoc_Error(t *testing.T) {
 	// Mock error scenario
+	expectedErr := errors.New("command not found")
 	executor := &MockExecutor{
 		OutputFunc: func(command string, args ...string) ([]byte, error) {
-			return nil, errors.New("command not found")
+			return nil, expectedErr
 		},
 	}
 
@@ -83,7 +87,12 @@ func TestParseModuleDoc_Error(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error, got nil")
 	}
-	if err.Error() != "command not found" {
+
+	// Print the error for debugging
+	t.Logf("error: %v", err)
+
+	// Verify that the error contains the expected underlying error
+	if !errors.Is(err, expectedErr) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
