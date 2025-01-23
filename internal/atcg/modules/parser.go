@@ -22,11 +22,11 @@ func (r *RealExecutor) Execute(command string, args ...string) ([]byte, error) {
 
 // ModuleOption represents a module option from ansible-doc output.
 type ModuleOption struct {
-	Choices     []string    `json:"choices,omitempty"`
-	Default     interface{} `json:"default,omitempty"`
-	Description []string    `json:"description,omitempty"`
-	Required    bool        `json:"required,omitempty"`
-	Type        string      `json:"type,omitempty"`
+	Choices     []interface{} `json:"choices,omitempty"`
+	Default     interface{}   `json:"default,omitempty"`
+	Description interface{}   `json:"description,omitempty"`
+	Required    bool          `json:"required,omitempty"`
+	Type        string        `json:"type,omitempty"`
 }
 
 // ModuleDoc represents the structure of ansible-doc JSON output.
@@ -38,14 +38,14 @@ type ModuleDoc struct {
 func ParseModuleDoc(exec CommandExecutor, module string) (*ModuleDoc, error) {
 	output, err := exec.Execute("ansible-doc", "-j", module)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error executing ansible-doc: %w", err)
 	}
 
 	var docs map[string]struct {
 		Doc ModuleDoc `json:"doc"`
 	}
 	if err := json.Unmarshal(output, &docs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error unmarshalling JSON: %w", err)
 	}
 
 	docStruct, found := docs[module]
